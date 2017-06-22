@@ -12,8 +12,8 @@ $pdo = new \PDO(
 	[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 );
 $loginService = new mineichen\Service\Login\LoginPdoService($pdo);
-
-
+$registerService = new mineichen\Service\Register\RegisterPdoService($pdo);
+$forumService = new mineichen\Service\Forum\ForumPdoService($pdo);
 
 switch($_SERVER["REQUEST_URI"]) {
 	case "/":
@@ -22,14 +22,45 @@ switch($_SERVER["REQUEST_URI"]) {
 	case "/testroute":
 		echo "Test";
 		break;
+    case "/home":
+		$ctr = new mineichen\Controller\ForumController($tmpl, $forumService);
+		if($_SERVER["REQUEST_METHOD"] == "GET") {
+			$ctr->showHome(array());
+		} else {
+			$ctr->showHome($_POST); // do i need this
+		}		
+		break;
 	case "/login":
-		$ctr = new mineichen\Controller\LoginController($tmpl, $pdo, $loginService);
+		$ctr = new mineichen\Controller\LoginController($tmpl, $loginService);
 		if($_SERVER["REQUEST_METHOD"] == "GET") {
 			$ctr->showLogin();
 		} else {
 			$ctr->login($_POST);
-		}
-		
+		}		
+		break;
+    case "/register":
+        $ctr = new mineichen\Controller\RegisterController($tmpl, $registerService);
+		if($_SERVER["REQUEST_METHOD"] == "GET") {
+			$ctr->showRegister();
+		} else {
+			$ctr->register($_POST);
+		}		
+		break;
+    case "/logout":
+        $ctr = new mineichen\Controller\LoginController($tmpl, $loginService);
+		if($_SERVER["REQUEST_METHOD"] == "GET") {
+			$ctr->showLogout();
+		} else {
+			$ctr->logout($_POST);
+		}		
+		break;
+    case "/createTopic":
+        $ctr = new mineichen\Controller\ForumController($tmpl, $forumService);
+		if($_SERVER["REQUEST_METHOD"] == "GET") {
+			$ctr->showCreateTopic();
+		} else {
+			$ctr->postTopic($_POST); // do i need this
+		}		
 		break;
 	default:
 		$matches = [];

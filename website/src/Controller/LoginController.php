@@ -22,10 +22,9 @@ class LoginController
   /**
    * @param ihrname\SimpleTemplateEngine
    */
-  public function __construct(SimpleTemplateEngine $template, \PDO $pdo, LoginServiceInterface $loginService)
+  public function __construct(SimpleTemplateEngine $template, LoginServiceInterface $loginService)
   {
      $this->template = $template;
-     $this->pdo = $pdo;
      $this->loginService = $loginService;  
   }
   
@@ -33,22 +32,22 @@ class LoginController
   {
   	echo $this->template->render("login.html.php");
   }
+  public function showLogout()
+  {
+  	echo $this->template->render("logout.html.php");
+  }
   
   public function login(array $data)
   {
-  	if(!array_key_exists("email", $data) OR !array_key_exists("password", $data)) {
+  	if(!array_key_exists("txtbx_reg_usr", $data) OR !array_key_exists("txtbx_reg_pas", $data)) {
   		echo $this->template->render("login.html.php");
   	} else {
-  		$stmt = $this->pdo->prepare("SELECT * FROM user WHERE email=? AND password=?");
-  		$stmt->bindValue(1, $data["email"]);
-  		$stmt->bindValue(2, $data["password"]);
-  		$stmt->execute();
-  		
-  		if($stmt->rowCount() == 1) {
-  			$_SESSION["email"] = $data["email"];
-  			header('Location: /');
+  		if($this->loginService->authenticate($data["txtbx_reg_usr"], $data["txtbx_reg_pas"])) {
+  			$_SESSION["sess_user"] = $data["txtbx_reg_usr"];
+  			//header('Location: /');
+            echo $this->template->render("home.html.php");
   		} else {
-  			echo $this->template->render("login.html.php");
+  			echo $this->template->render("login.html.php", ["email" => $data["txtbx_reg_usr"]]);
   		}
   	}
   }
